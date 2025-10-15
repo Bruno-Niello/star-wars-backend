@@ -80,11 +80,10 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 
 Por falta de tiempo los testing automatizados no lograron un coverage del 100%. Para el testing se utilizo Jest y para agilizar tareas y mockeos se utilizo Gemini (IA-Google). 
 
-|------------------------------|---------|----------|---------|---------|
+
 | File                         | % Stmts | % Branch | % Funcs | % Lines |
 |------------------------------|---------|----------|---------|---------|
 | All files                    |   78.02 |    66.81 |    87.5 |   79.05 |
-|------------------------------|---------|----------|---------|---------|
 
 ---
 
