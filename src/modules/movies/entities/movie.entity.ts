@@ -21,10 +21,16 @@ export class Movie {
   release_date: string;
 
   @Column("text", { nullable: true })
-  swapi_id: string;
+  swapi_url: string;
 
   @Column({ type: "text", nullable: true })
   opening_crawl: string;
+
+  @Column({ type: "text", nullable: true })
+  producer: string;
+
+  @Column({ type: "int", nullable: true })
+  episode_id: number;
 
   @CreateDateColumn()
   created_at: Date;

@@ -3,6 +3,8 @@ import { ConfigModule } from "@nestjs/config";
 import { MoviesModule } from "./modules/movies/movies.module";
 import { UsersModule } from "./modules/users/users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ScheduleModule } from "@nestjs/schedule";
+// import { SwapiModule } from "./modules/swapi/swapi.module";
 // import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
@@ -20,6 +22,8 @@ import { TypeOrmModule } from "@nestjs/typeorm";
     }),
     UsersModule,
     MoviesModule,
+    // SwapiModule,
+    ScheduleModule.forRoot(),
     // AuthModule,
   ],
   exports: [],

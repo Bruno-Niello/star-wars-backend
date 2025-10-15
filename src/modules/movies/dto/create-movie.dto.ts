@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateMovieDto {
   @ApiProperty()
@@ -17,10 +17,20 @@ export class CreateMovieDto {
 
   @ApiProperty()
   @IsString()
-  swapi_id: string;
+  swapi_url: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   opening_crawl?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  producer?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsInt()
+  episode_id?: number;
 }

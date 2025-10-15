@@ -19,6 +19,7 @@ import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
+  // esto deberia ser solo para admin
   @Post()
   @ApiOperation({ summary: "Create a new movie" })
   @ApiResponse({ status: 201, description: "The movie has been successfully created." })
@@ -34,11 +35,13 @@ export class MoviesController {
     return this.moviesService.findAll();
   }
 
+  // esto deberia ser solo para users y no admins
   @Get(":id")
   findOne(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.moviesService.findOne(id);
   }
 
+  // esto deberia ser solo para admins
   @Patch(":id")
   @UseGuards()
   // @Roles("admin")
@@ -48,8 +51,16 @@ export class MoviesController {
     return this.moviesService.update(id, updateMovieDto);
   }
 
+  // esto deberia ser solo para admins
   @Delete(":id")
   remove(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.moviesService.remove(id);
+  }
+
+  @Get("sync/swapi")
+  @ApiOperation({ summary: "Sync local DB with SWAPI" })
+  @ApiResponse({ status: 200, description: "SWAPI data synchronized successfully." })
+  syncWithSwapi() {
+    return this.moviesService.syncWithSwapi();
   }
 }
