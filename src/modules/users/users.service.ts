@@ -22,8 +22,6 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    console.log("entraste bro");
-    console.log(createUserDto);
     try {
       const { email, password, ...data } = createUserDto;
 
@@ -88,6 +86,36 @@ export class UsersService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _password, ...safeUser } = user;
       return safeUser;
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
+  /* 
+    This method is similar to findOne but returns the user including the password for Auth purposes.
+  **/
+  async findOneWithPassword(term: string) {
+    try {
+      if (!term || typeof term !== "string") {
+        throw new BadRequestException("Invalid ID or Email format.");
+      }
+
+      let user: User | null;
+
+      const isUUID = /^[0-9a-fA-F-]{36}$/.test(term);
+      if (isUUID) {
+        user = await this.userRepository.findOneBy({ id: term });
+      } else {
+        user = await this.userRepository.findOneBy({ email: term });
+      }
+
+      if (!user) {
+        this.logger.warn(`User with ${term} not found`);
+        throw new NotFoundException(`User with ${term} not found`);
+      }
+
+      this.logger.log(`User found: ${user.email}`);
+      return user;
     } catch (error) {
       this.handleExceptions(error);
     }

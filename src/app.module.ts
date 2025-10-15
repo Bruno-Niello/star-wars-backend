@@ -4,8 +4,8 @@ import { MoviesModule } from "./modules/movies/movies.module";
 import { UsersModule } from "./modules/users/users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ScheduleModule } from "@nestjs/schedule";
-// import { SwapiModule } from "./modules/swapi/swapi.module";
-// import { AuthModule } from "./modules/auth/auth.module";
+import { AuthModule } from "./modules/auth/auth.module";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
   imports: [
@@ -20,11 +20,15 @@ import { ScheduleModule } from "@nestjs/schedule";
       autoLoadEntities: true,
       synchronize: true,
     }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || "defaultSecret",
+      signOptions: { expiresIn: "1d" },
+      global: true,
+    }),
     UsersModule,
     MoviesModule,
-    // SwapiModule,
     ScheduleModule.forRoot(),
-    // AuthModule,
+    AuthModule,
   ],
   exports: [],
 })
