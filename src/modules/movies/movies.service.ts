@@ -75,11 +75,13 @@ export class MoviesService {
   async update(updateMovieDto: UpdateMovieDto) {
     try {
       const { id, ...body } = updateMovieDto;
-      const movie = await this.findOne(id);
+      await this.findOne(id);
 
       await this.movieRepository.update(id, body);
       this.logger.log(`Movie updated: ${id}`);
-      return movie;
+
+      const updatedMovie = await this.findOne(id);
+      return updatedMovie;
     } catch (error) {
       this.handleExceptions(error);
     }
