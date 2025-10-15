@@ -19,6 +19,7 @@ async function main() {
     .setDescription("The Conexa Star Wars API description")
     .setVersion("1.0")
     .addTag("conexa")
+    .addBearerAuth()
     .build();
 
   const documentFactory = () => SwaggerModule.createDocument(app, config);

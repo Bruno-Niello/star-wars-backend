@@ -8,7 +8,6 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
 import { Reflector } from "@nestjs/core";
-import { ConfigService } from "@nestjs/config";
 import { PUBLIC_KEY } from "./roles";
 
 @Injectable()
@@ -16,8 +15,7 @@ export class AuthGuard implements CanActivate {
   private readonly logger = new Logger("AuthGuard");
   constructor(
     private jwtService: JwtService,
-    private reflector: Reflector,
-    private configService: ConfigService
+    private reflector: Reflector
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,7 +32,7 @@ export class AuthGuard implements CanActivate {
       if (!token) {
         throw new UnauthorizedException("No token provided");
       }
-      const jwtSecret = this.configService.get<string>("JWT_SECRET");
+      const jwtSecret = process.env.JWT_SECRET || "defaultSecret";
       request["user"] = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: jwtSecret,
       });
