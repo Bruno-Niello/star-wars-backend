@@ -22,8 +22,10 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
+    console.log("entraste bro");
+    console.log(createUserDto);
     try {
-      const { email, password, role } = createUserDto;
+      const { email, password, ...data } = createUserDto;
 
       const existingUser = await this.userRepository.findOneBy({ email });
       if (existingUser) {
@@ -32,11 +34,7 @@ export class UsersService {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const user = this.userRepository.create({
-        email,
-        password: hashedPassword,
-        role,
-      });
+      const user = this.userRepository.create({ ...data, email, password: hashedPassword });
 
       await this.userRepository.save(user);
       this.logger.log(`User created: ${user.email}`);
@@ -95,16 +93,15 @@ export class UsersService {
     }
   }
 
-  async update(updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     try {
-      const { id, ...data } = updateUserDto;
       await this.findOne(id);
 
-      if (data.password) {
-        data.password = await bcrypt.hash(data.password, 10);
+      if (updateUserDto.password) {
+        updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
       }
 
-      await this.userRepository.update(id, data);
+      await this.userRepository.update(id, updateUserDto);
       this.logger.log(`User updated: ${id}`);
 
       const updatedUser = await this.findOne(id);

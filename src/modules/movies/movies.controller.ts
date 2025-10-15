@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  ParseUUIDPipe,
+} from "@nestjs/common";
 import { MoviesService } from "./movies.service";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
@@ -25,7 +35,7 @@ export class MoviesController {
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
+  findOne(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.moviesService.findOne(id);
   }
 
@@ -34,12 +44,12 @@ export class MoviesController {
   // @Roles("admin")
   @ApiResponse({ status: 403, description: "Forbidden. Only admins can update movies." })
   @ApiOperation({ summary: "Update a movie by its ID" })
-  update(@Param("id") id: string, @Body() updateMovieDto: UpdateMovieDto) {
-    return this.moviesService.update(Object.assign({ id }, updateMovieDto));
+  update(@Param("id", new ParseUUIDPipe()) id: string, @Body() updateMovieDto: UpdateMovieDto) {
+    return this.moviesService.update(id, updateMovieDto);
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
+  remove(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.moviesService.remove(id);
   }
 }

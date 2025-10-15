@@ -9,7 +9,10 @@ export class User {
   email: string;
 
   @Column("text")
-  password: string; // necesito hashear esto wey deap NASHEi
+  password: string;
+
+  @Column("text")
+  name: string;
 
   @Column({ type: "enum", enum: ["admin", "user"], default: "user" })
   role: "admin" | "user";
