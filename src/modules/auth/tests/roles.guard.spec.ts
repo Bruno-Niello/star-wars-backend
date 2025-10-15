@@ -1,123 +1,53 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { RolesGuard } from "./roles.guard";
 import { Reflector } from "@nestjs/core";
-import { UnauthorizedException } from "@nestjs/common";
-import { ExecutionContext } from "@nestjs/common";
-import { ROLES } from "./roles";
+import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
+import { RolesGuard } from "../guards/roles.guard";
 
-describe("RolesGuard", (): void => {
-  let rolesGuard: RolesGuard;
-  let reflector: Reflector;
-  let mockExecutionContext: Partial<ExecutionContext>;
+describe("RolesGuard", () => {
+  let guard: RolesGuard;
+  let reflector: Partial<Reflector>;
 
-  beforeEach(async (): Promise<void> => {
-    reflector = { get: jest.fn() } as unknown as Reflector;
+  const mockContext = (user: unknown) =>
+    ({
+      switchToHttp: () => ({
+        getRequest: (): { user: unknown } => ({ user }),
+      }),
+      getHandler: jest.fn(() => ({})),
+    }) as unknown as ExecutionContext;
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [RolesGuard, { provide: Reflector, useValue: reflector }],
-    }).compile();
-
-    rolesGuard = module.get<RolesGuard>(RolesGuard);
+  beforeEach(() => {
+    reflector = {
+      get: jest.fn(),
+    };
+    guard = new RolesGuard(reflector as Reflector);
   });
 
-  afterEach((): void => {
-    jest.clearAllMocks();
+  it("permite cuando no hay metadata de roles (no está protegido)", () => {
+    (reflector.get as jest.Mock).mockReturnValue(undefined);
+    const ctx = mockContext({ roles: ["ADMIN"] });
+    expect(guard.canActivate(ctx)).toBe(true);
   });
 
-  it("should be defined", (): void => {
-    expect(rolesGuard).toBeDefined();
+  it("permite si el usuario tiene alguno de los roles requeridos (roles array)", () => {
+    (reflector.get as jest.Mock).mockReturnValue(["ADMIN", "MOD"]);
+    const ctx = mockContext({ roles: ["USER", "ADMIN"] });
+    expect(guard.canActivate(ctx)).toBe(true);
   });
 
-  describe("canActivate", (): void => {
-    it("should return true if route is public", (): void => {
-      reflector.get = jest.fn().mockReturnValue(true);
+  it("permite si el usuario tiene el role como string", () => {
+    (reflector.get as jest.Mock).mockReturnValue(["ADMIN"]);
+    const ctx = mockContext({ role: "ADMIN" });
+    expect(guard.canActivate(ctx)).toBe(true);
+  });
 
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({ user: { role: ROLES.USER } }),
-        }),
-        getHandler: () => jest.fn(),
-        getClass: () => jest.fn(),
-      } as unknown as ExecutionContext;
+  it("lanza UnauthorizedException si el usuario no tiene los roles requeridos", () => {
+    (reflector.get as jest.Mock).mockReturnValue(["ADMIN"]);
+    const ctx = mockContext({ roles: ["USER"] });
+    expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
+  });
 
-      expect(rolesGuard.canActivate(context)).toBe(true);
-    });
-
-    it("should throw UnauthorizedException if user role is not present", (): void => {
-      reflector.get = jest.fn().mockReturnValue(undefined);
-
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({ user: {} }),
-        }),
-        getHandler: () => jest.fn(),
-        getClass: () => jest.fn(),
-      } as unknown as ExecutionContext;
-
-      expect(() => rolesGuard.canActivate(context)).toThrow(UnauthorizedException);
-    });
-
-    it("should return true if user role matches admin role and admin role is defined", (): void => {
-      reflector.get = jest
-        .fn()
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce(undefined)
-        .mockReturnValueOnce(ROLES.ADMIN);
-
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({ user: { role: ROLES.ADMIN } }),
-        }),
-        getHandler: () => jest.fn(),
-        getClass: () => jest.fn(),
-      } as unknown as ExecutionContext;
-
-      expect(rolesGuard.canActivate(context)).toBe(true);
-    });
-
-    it("should throw UnauthorizedException if user role does not match required roles", (): void => {
-      jest.spyOn(reflector, "get").mockImplementation(key => {
-        if (key === "roles") {
-          return [ROLES.ADMIN];
-        }
-        return null;
-      });
-
-      expect(() => rolesGuard.canActivate(mockExecutionContext as ExecutionContext)).toThrow(
-        UnauthorizedException
-      );
-    });
-
-    it("should return true if user role matches one of the required roles", (): void => {
-      reflector.get = jest.fn().mockReturnValueOnce(false).mockReturnValueOnce([ROLES.USER]);
-
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({ user: { role: ROLES.USER } }),
-        }),
-        getHandler: () => jest.fn(),
-        getClass: () => jest.fn(),
-      } as unknown as ExecutionContext;
-
-      expect(rolesGuard.canActivate(context)).toBe(true);
-    });
-
-    it("should return true if user role is authorized and not admin", (): void => {
-      reflector.get = jest
-        .fn()
-        .mockReturnValueOnce(false)
-        .mockReturnValueOnce([ROLES.USER])
-        .mockReturnValueOnce(undefined);
-
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => ({ user: { role: ROLES.USER } }),
-        }),
-        getHandler: () => jest.fn(),
-        getClass: () => jest.fn(),
-      } as unknown as ExecutionContext;
-
-      expect(rolesGuard.canActivate(context)).toBe(true);
-    });
+  it("lanza UnauthorizedException si no existe usuario en la request", () => {
+    (reflector.get as jest.Mock).mockReturnValue(["ADMIN"]);
+    const ctx = mockContext(undefined);
+    expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
   });
 });

@@ -39,7 +39,10 @@ export class MoviesController {
   @Get()
   @ApiResponse({ status: 200, description: "List of movies retrieved successfully." })
   @ApiOperation({ summary: "Retrieve a list of all movies" })
-  findAll(@Query("orderBy") orderBy?: keyof Movie, @Query("orderDir") orderDir?: "ASC" | "DESC") {
+  findAll(
+    @Query("orderBy") orderBy: keyof Movie = "title",
+    @Query("orderDir") orderDir: "ASC" | "DESC" = "ASC"
+  ) {
     return this.moviesService.findAll(orderBy, orderDir);
   }
 
