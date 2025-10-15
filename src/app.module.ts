@@ -2,11 +2,8 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { MoviesModule } from "./modules/movies/movies.module";
 import { UsersModule } from "./modules/users/users.module";
-import { UsersController } from "./modules/users/users.controller";
-import { MoviesController } from "./modules/movies/movies.controller";
-import { MoviesService } from "./modules/movies/movies.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { UsersService } from "./modules/users/users.service";
+// import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
   imports: [
@@ -21,11 +18,10 @@ import { UsersService } from "./modules/users/users.service";
       autoLoadEntities: true,
       synchronize: true,
     }),
-    MoviesModule,
     UsersModule,
+    MoviesModule,
+    // AuthModule,
   ],
-  controllers: [UsersController, MoviesController],
-  providers: [MoviesService, UsersService],
   exports: [],
 })
 export class AppModule {}

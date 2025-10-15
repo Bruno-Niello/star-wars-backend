@@ -1,34 +1,45 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from "@nestjs/common";
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from "@nestjs/common";
 import { MoviesService } from "./movies.service";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("movies")
 @Controller("movies")
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
 
   @Post()
+  @ApiOperation({ summary: "Create a new movie" })
+  @ApiResponse({ status: 201, description: "The movie has been successfully created." })
+  @ApiResponse({ status: 400, description: "Bad Request. Invalid input data." })
   create(@Body() createMovieDto: CreateMovieDto) {
     return this.moviesService.create(createMovieDto);
   }
 
   @Get()
+  @ApiOperation({ summary: "Retrieve a list of all movies" })
+  @ApiResponse({ status: 200, description: "List of movies retrieved successfully." })
   findAll() {
     return this.moviesService.findAll();
   }
 
   @Get(":id")
   findOne(@Param("id") id: string) {
-    return this.moviesService.findOne(+id);
+    return this.moviesService.findOne(id);
   }
 
   @Patch(":id")
+  @UseGuards()
+  // @Roles("admin")
+  @ApiResponse({ status: 403, description: "Forbidden. Only admins can update movies." })
+  @ApiOperation({ summary: "Update a movie by its ID" })
   update(@Param("id") id: string, @Body() updateMovieDto: UpdateMovieDto) {
-    return this.moviesService.update(+id, updateMovieDto);
+    return this.moviesService.update(Object.assign({ id }, updateMovieDto));
   }
 
   @Delete(":id")
   remove(@Param("id") id: string) {
-    return this.moviesService.remove(+id);
+    return this.moviesService.remove(id);
   }
 }

@@ -17,4 +17,7 @@ async function main() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-main();
+main().catch(err => {
+  console.error("Error starting server:", err);
+  process.exit(1);
+});
