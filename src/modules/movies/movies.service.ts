@@ -12,6 +12,7 @@ import { Movie } from "./entities/movie.entity";
 import { Repository } from "typeorm";
 import { isUUID } from "class-validator";
 import axios, { AxiosResponse } from "axios";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 @Injectable()
 export class MoviesService {
@@ -134,6 +135,12 @@ export class MoviesService {
     }
 
     return { count: response.length, results: response };
+  }
+
+  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  async handleSwapiSyncCron() {
+    this.logger.log("Running scheduled SWAPI sync...");
+    await this.syncWithSwapi();
   }
 
   private async fetchAllFilms(): Promise<SwapiFilmProperties[]> {
