@@ -1,0 +1,12 @@
+services: 
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    container_name: nest_conexa_db
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
