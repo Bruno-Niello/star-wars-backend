@@ -64,6 +64,10 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
   docker-compose up -d 
 ```
 
+> **Nota:** Si usas DBeaver y ves el error  
+> `Invalid value for parameter "TimeZone": "America/Buenos_Aires"`  
+> cambia el valor de la zona horaria o usa otra herramienta.
+
 5. **Iniciar el modo desarrollo**
 ```bash
    npm run start:dev
@@ -72,6 +76,7 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 
 ## Estructura del proyecto
 
+```plaintext
 src/
   app.module.ts
   main.ts
@@ -80,6 +85,7 @@ src/
     movies/    # Gestión de películas
     users/     # Gestión de usuarios
   common/      # Excepciones y utilidades
+```
 
 ---
 
@@ -100,7 +106,3 @@ src/
 - El proyecto utiliza **TypeORM** y una base de datos **PostgreSQL** por defecto.
 - Puedes modificar la configuración de la base de datos en el archivo `.env`.
 - Si tienes problemas con dependencias de guards en los tests, asegúrate de **mockearlos correctamente**.
-
-> **Nota:** Si usas DBeaver y ves el error  
-> `Invalid value for parameter "TimeZone": "America/Buenos_Aires"`  
-> cambia el valor de la zona horaria o usa otra herramienta.
