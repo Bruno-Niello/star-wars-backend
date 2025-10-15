@@ -44,14 +44,25 @@ export class MoviesService {
     }
   }
 
-  findAll() {
+  /*
+   * Default sorting by title in ascending order
+   * You can pass orderBy and orderDir on query params to customize sorting
+   * For example: /movies?orderBy=release_date&orderDir=DESC
+   **/
+  async findAll(orderBy: keyof Movie = "title", orderDir: "ASC" | "DESC" = "ASC") {
     try {
-      return this.movieRepository.find();
+      return await this.movieRepository.find({
+        order: { [orderBy]: orderDir },
+      });
     } catch (error) {
       this.handleExceptions(error);
     }
   }
 
+  /*
+   * Find by ID (UUID) or Title (string)
+   * Example: findOne('550e8400-e29b-41d4-a716-446655440000') or findOne('A New Hope')
+   **/
   async findOne(term: string) {
     try {
       if (!term || typeof term !== "string") {
@@ -137,6 +148,10 @@ export class MoviesService {
     return { count: response.length, results: response };
   }
 
+  /*
+   * You can replace the cron expression with @Cron(CronExpression.EVERY_MINUTE) for testing purposes
+   * By default this will run the sync every day at 3 AM
+   **/
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleSwapiSyncCron() {
     this.logger.log("Running scheduled SWAPI sync...");

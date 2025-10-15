@@ -8,11 +8,13 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
+  Query,
 } from "@nestjs/common";
 import { MoviesService } from "./movies.service";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { Movie } from "./entities/movie.entity";
 
 @ApiTags("movies")
 @Controller("movies")
@@ -31,8 +33,8 @@ export class MoviesController {
   @Get()
   @ApiOperation({ summary: "Retrieve a list of all movies" })
   @ApiResponse({ status: 200, description: "List of movies retrieved successfully." })
-  findAll() {
-    return this.moviesService.findAll();
+  findAll(@Query("orderBy") orderBy?: keyof Movie, @Query("orderDir") orderDir?: "ASC" | "DESC") {
+    return this.moviesService.findAll(orderBy, orderDir);
   }
 
   // esto deberia ser solo para users y no admins
