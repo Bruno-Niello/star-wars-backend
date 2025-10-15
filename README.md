@@ -85,7 +85,6 @@ src/
 
 ## Comandos útiles
 
-|------------------------------------------------------------------------|
 | Comando                  | Descripción                                 |
 |--------------------------|---------------------------------------------|
 | `npm run start:dev`      | Inicia el servidor en modo desarrollo       |
@@ -93,7 +92,6 @@ src/
 | `npm run test:cov`       | Muestra el reporte de cobertura de tests    |
 | `docker-compose up -d`   | Levanta la base de datos en Docker          |
 | `docker-compose down`    | Detiene y elimina los contenedores de Docker|
-|------------------------------------------------------------------------|
 
 ---
 
