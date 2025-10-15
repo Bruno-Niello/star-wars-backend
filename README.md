@@ -100,9 +100,6 @@ src/
 - El proyecto utiliza **TypeORM** y una base de datos **PostgreSQL** por defecto.
 - Puedes modificar la configuración de la base de datos en el archivo `.env`.
 - Si tienes problemas con dependencias de guards en los tests, asegúrate de **mockearlos correctamente**.
-- Si usas **DBeaver** y ves el error  
-  `Invalid value for parameter "TimeZone": "America/Buenos_Aires"`  
-  cambia el valor de la zona horaria o usa otra herramienta.
 
 > **Nota:** Si usas DBeaver y ves el error  
 > `Invalid value for parameter "TimeZone": "America/Buenos_Aires"`  
