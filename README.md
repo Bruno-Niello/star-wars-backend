@@ -15,6 +15,7 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 - [Características](#características)
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
+- [Testing](#testing)
 - [Comandos útiles](#comandos-útiles)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Notas](#notas)
