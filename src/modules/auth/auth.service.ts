@@ -23,10 +23,16 @@ export class AuthService {
 
   async validateUser(email: string, password: string) {
     try {
+      this.logger.log(`validateUser - trying to find user by email: ${email}`);
       const user: User | undefined = await this.usersService.findOneWithPassword(email);
-      if (!user) return null;
+      if (!user) {
+        this.logger.log(`validateUser - user not found: ${email}`);
+        return null;
+      }
 
       const comparedPassword = await bcrypt.compare(password, user.password);
+      this.logger.log(`validateUser - password match for ${email}: ${comparedPassword}`);
+
       if (comparedPassword) {
         // Exclude password from the returned user object
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -36,7 +42,6 @@ export class AuthService {
 
       return null;
     } catch (error) {
-      if (error instanceof NotFoundException) return null;
       this.logger.error(error);
       return null;
     }
@@ -46,20 +51,18 @@ export class AuthService {
     let userExists: User | null | undefined;
     try {
       userExists = await this.usersService.findOneWithPassword(user.email);
-    } catch (e) {
-      if (e instanceof NotFoundException) {
+    } catch (error) {
+      if (error instanceof NotFoundException) {
         userExists = null;
       } else {
-        this.logger.error(e);
-        throw e;
+        this.logger.error(error);
+        throw error;
       }
     }
 
     if (userExists) throw new ConflictException(`User already exists`);
 
     try {
-      user.password = await bcrypt.hash(user.password, 10);
-
       const createdUser = await this.usersService.create(user);
       if (!createdUser) throw new UnauthorizedException();
 
@@ -70,8 +73,8 @@ export class AuthService {
           expiresIn: "1d",
         }),
       };
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(error);
       throw new UnauthorizedException();
     }
   }
@@ -91,8 +94,8 @@ export class AuthService {
           expiresIn: "1d",
         }),
       };
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(error);
       throw new UnauthorizedException();
     }
   }
@@ -117,8 +120,8 @@ export class AuthService {
           expiresIn: "1d",
         }),
       };
-    } catch (e) {
-      this.logger.error(e);
+    } catch (error) {
+      this.logger.error(error);
       throw new UnauthorizedException("Invalid or expired refresh token");
     }
   }

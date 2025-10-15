@@ -139,6 +139,23 @@ export class UsersService {
     }
   }
 
+  async createAdmin(email: string) {
+    this.logger.log(`Promoting user to admin: ${email}`);
+    try {
+      const user = await this.userRepository.findOneBy({ email });
+      if (!user) {
+        throw new NotFoundException(`User with email ${email} not found`);
+      }
+
+      user.role = "admin";
+      await this.userRepository.save(user);
+      this.logger.log(`User promoted to admin: ${user.email}`);
+      return { message: `User with email ${email} is now an admin` };
+    } catch (error) {
+      this.handleExceptions(error);
+    }
+  }
+
   async remove(id: string) {
     try {
       const user = await this.userRepository.findOneBy({ id });

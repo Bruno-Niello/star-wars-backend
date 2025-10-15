@@ -3,6 +3,7 @@ import { UsersService } from "./users.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { ApiTags } from "@nestjs/swagger";
 import { CreateUserDto } from "./dto/create-user.dto";
+import { CreateAdminDto } from "./dto/create-admin.dto";
 
 @ApiTags("users")
 @Controller("users")
@@ -33,5 +34,14 @@ export class UsersController {
   @Delete(":id")
   remove(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.usersService.remove(id);
+  }
+
+  /* 
+    This endpoint is just for testing purposes. It should be removed in production.
+    It updates a user to have the admin role based on their email.
+  **/
+  @Post("create-admin")
+  createAdmin(@Body() createAdminDto: CreateAdminDto) {
+    return this.usersService.createAdmin(createAdminDto.email);
   }
 }
