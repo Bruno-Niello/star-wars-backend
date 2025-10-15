@@ -1,11 +1,27 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { UsersController } from "../users.controller";
 import { UsersService } from "../users.service";
+import { CreateUserDto } from "../dto/create-user.dto";
 import { UpdateUserDto } from "../dto/update-user.dto";
 import { CreateAdminDto } from "../dto/create-admin.dto";
 
+// 1. Mock de los Guards para que SIEMPRE permitan la activación
+// Esto aísla el test de la lógica de autenticación/autorización real.
+jest.mock("../../auth/guards/auth.guard", () => ({
+  AuthGuard: jest.fn().mockImplementation(() => ({
+    canActivate: jest.fn().mockReturnValue(true),
+  })),
+}));
+jest.mock("../../auth/guards/roles.guard", () => ({
+  RolesGuard: jest.fn().mockImplementation(() => ({
+    canActivate: jest.fn().mockReturnValue(true),
+  })),
+}));
+
 describe("UsersController", () => {
   let controller: UsersController;
+
+  // 2. Mock del servicio, definiendo solo los métodos que usa el controlador.
   const mockUsersService = {
     create: jest.fn(),
     findAll: jest.fn(),
@@ -25,76 +41,128 @@ describe("UsersController", () => {
   });
 
   afterEach(() => {
+    // Limpiamos los mocks después de cada prueba
     jest.clearAllMocks();
   });
 
-  it("debe estar definido", () => {
+  // --- Test de Inicialización ---
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 
-  describe("create", () => {
-    it("llama a usersService.create y retorna usuario creado", async () => {
-      const dto: { email: string; name: string; password: string } = {
-        email: "a@b.com",
-        name: "A",
-        password: "pwd",
-      };
-      const expected = { id: "1", ...dto };
-      mockUsersService.create.mockResolvedValueOnce(expected);
+  // ----------------------------------------------------------------------
 
-      await expect(controller.create(dto)).resolves.toEqual(expected);
+  describe("create", () => {
+    it("should call usersService.create with the correct DTO and return the created user", async () => {
+      // Arrange
+      const dto: CreateUserDto = {
+        email: "test@example.com",
+        password: "password123",
+        name: "Test User",
+      } as CreateUserDto;
+      const createdUser = { id: "uuid-1", ...dto };
+      mockUsersService.create.mockResolvedValueOnce(createdUser);
+
+      // Act & Assert
+      await expect(controller.create(dto)).resolves.toEqual(createdUser);
+
+      // Assert: Verificar que el servicio fue llamado
       expect(mockUsersService.create).toHaveBeenCalledWith(dto);
+      expect(mockUsersService.create).toHaveBeenCalledTimes(1);
     });
   });
+
+  // ----------------------------------------------------------------------
 
   describe("findAll", () => {
-    it("llama a usersService.findAll y retorna lista", async () => {
-      const list = [{ id: "1", email: "a@a.com" }];
-      mockUsersService.findAll.mockResolvedValueOnce(list);
+    it("should call usersService.findAll and return a list of users", async () => {
+      // Arrange
+      const userList = [{ id: "uuid-1", email: "a@b.com" }];
+      mockUsersService.findAll.mockResolvedValueOnce(userList);
 
-      await expect(controller.findAll()).resolves.toEqual(list);
+      // Act & Assert
+      await expect(controller.findAll()).resolves.toEqual(userList);
+
+      // Assert
       expect(mockUsersService.findAll).toHaveBeenCalled();
+      expect(mockUsersService.findAll).toHaveBeenCalledTimes(1);
     });
   });
+
+  // ----------------------------------------------------------------------
 
   describe("findOne", () => {
-    it("llama a usersService.findOne y retorna usuario", async () => {
-      const u = { id: "uuid", email: "a@a.com" };
-      mockUsersService.findOne.mockResolvedValueOnce(u);
+    const userId = "a9b8c7d6-e5f4-3210-9876-543210fedcba";
 
-      await expect(controller.findOne("uuid")).resolves.toEqual(u);
-      expect(mockUsersService.findOne).toHaveBeenCalledWith("uuid");
+    it("should call usersService.findOne with the ID and return the user", async () => {
+      // Arrange
+      const user = { id: userId, email: "single@user.com" };
+      mockUsersService.findOne.mockResolvedValueOnce(user);
+
+      // Act & Assert
+      await expect(controller.findOne(userId)).resolves.toEqual(user);
+
+      // Assert
+      expect(mockUsersService.findOne).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.findOne).toHaveBeenCalledTimes(1);
     });
   });
+
+  // ----------------------------------------------------------------------
 
   describe("update", () => {
-    it("llama a usersService.update y retorna actualizado", async () => {
-      const updated = { id: "u1", name: "New" };
-      mockUsersService.update.mockResolvedValueOnce(updated);
+    const userId = "a9b8c7d6-e5f4-3210-9876-543210fedcba";
+    const dto: UpdateUserDto = { role: "admin" } as UpdateUserDto;
 
-      const updateDto: UpdateUserDto = { name: "New" };
-      await expect(controller.update("u1", updateDto)).resolves.toEqual(updated);
-      expect(mockUsersService.update).toHaveBeenCalledWith("u1", expect.any(Object));
+    it("should call usersService.update with ID and DTO, and return the updated user", async () => {
+      // Arrange
+      const updatedUser = { id: userId, email: "user@updated.com", role: "admin" };
+      mockUsersService.update.mockResolvedValueOnce(updatedUser);
+
+      // Act & Assert
+      await expect(controller.update(userId, dto)).resolves.toEqual(updatedUser);
+
+      // Assert
+      expect(mockUsersService.update).toHaveBeenCalledWith(userId, dto);
+      expect(mockUsersService.update).toHaveBeenCalledTimes(1);
     });
   });
+
+  // ----------------------------------------------------------------------
 
   describe("remove", () => {
-    it("llama a usersService.remove y retorna resultado", async () => {
-      mockUsersService.remove.mockResolvedValueOnce({ affected: 1 });
+    const userId = "a9b8c7d6-e5f4-3210-9876-543210fedcba";
 
-      await expect(controller.remove("u1")).resolves.toEqual({ affected: 1 });
-      expect(mockUsersService.remove).toHaveBeenCalledWith("u1");
+    it("should call usersService.remove with the ID and return the result", async () => {
+      // Arrange
+      const deleteResult = { affected: 1 };
+      mockUsersService.remove.mockResolvedValueOnce(deleteResult);
+
+      // Act & Assert
+      await expect(controller.remove(userId)).resolves.toEqual(deleteResult);
+
+      // Assert
+      expect(mockUsersService.remove).toHaveBeenCalledWith(userId);
+      expect(mockUsersService.remove).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe("createAdmin", () => {
-    it("llama a usersService.createAdmin y retorna resultado", async () => {
-      const result = { id: "u1", email: "a@a.com", roles: ["admin"] };
-      mockUsersService.createAdmin.mockResolvedValueOnce(result);
-      const createAdminDto: CreateAdminDto = { email: "a@a.com" };
-      await expect(controller.createAdmin(createAdminDto)).resolves.toEqual(result);
-      expect(mockUsersService.createAdmin).toHaveBeenCalledWith("a@a.com");
-      expect(mockUsersService.createAdmin).toHaveBeenCalledWith("a@a.com");
+  // ----------------------------------------------------------------------
+
+  describe("createAdmin (Public Endpoint)", () => {
+    it("should call usersService.createAdmin with the email from the DTO", async () => {
+      // Arrange
+      const email = "admin_to_create@test.com";
+      const dto: CreateAdminDto = { email } as CreateAdminDto;
+      const adminUser = { id: "uuid-admin", email, role: "ADMIN" };
+      mockUsersService.createAdmin.mockResolvedValueOnce(adminUser);
+
+      // Act & Assert
+      await expect(controller.createAdmin(dto)).resolves.toEqual(adminUser);
+
+      // Assert
+      expect(mockUsersService.createAdmin).toHaveBeenCalledWith(email);
+      expect(mockUsersService.createAdmin).toHaveBeenCalledTimes(1);
     });
   });
 });
