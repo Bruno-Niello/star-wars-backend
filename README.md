@@ -19,6 +19,7 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 - [Comandos útiles](#comandos-útiles)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Notas](#notas)
+- [Documentación](#documentación)
 
 ---
 
@@ -73,6 +74,34 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 ```bash
    npm run start:dev
 ```
+
+---
+
+---
+
+## Documentación
+
+### Swagger (OpenAPI)
+
+Esta API expone documentación interactiva generada automáticamente con [Swagger](https://swagger.io/) gracias al módulo `@nestjs/swagger`.
+
+- Cuando el servidor está en ejecución, accede a la documentación en:  
+  [http://localhost:3000/api](http://localhost:3000/api)
+
+- Desde la interfaz de Swagger puedes:
+  - Probar los endpoints directamente desde el navegador.
+  - Ver los modelos de datos y respuestas.
+  - Consultar los parámetros, tipos y descripciones de cada ruta.
+
+La configuración de Swagger se encuentra en el archivo principal (`main.ts`).  
+Puedes personalizar la documentación modificando los decoradores `@Api*` en controladores, DTOs y entidades.
+
+### JSDoc
+
+El código fuente utiliza comentarios **JSDoc** para describir funciones, clases y métodos importantes, facilitando la comprensión y el mantenimiento del proyecto.
+
+- Puedes ver las descripciones y anotaciones directamente en el código.
+- Los IDEs como VS Code muestran estos comentarios al pasar el cursor sobre funciones y clases.
 
 ---
 
