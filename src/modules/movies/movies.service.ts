@@ -23,7 +23,17 @@ export class MoviesService {
     private readonly movieRepository: Repository<Movie>
   ) {}
 
-  async create(createMovieDto: CreateMovieDto, suppressErrors = false) {
+  /**
+   * Create a new movie
+   * @param createMovieDto - Data transfer object for creating a movie
+   * @param suppressErrors - Flag to suppress errors
+   * @returns The created movie or null if suppressed
+   * @throws BadRequestException if the movie already exists
+   */
+  async create(
+    createMovieDto: CreateMovieDto,
+    suppressErrors = false
+  ): Promise<Movie | null | undefined> {
     try {
       const { title } = createMovieDto;
       const titleExist = await this.movieRepository.findOneBy({ title });
@@ -44,26 +54,38 @@ export class MoviesService {
     }
   }
 
-  /*
+  /**
    * Default sorting by title in ascending order
    * You can pass orderBy and orderDir on query params to customize sorting
    * For example: /movies?orderBy=release_date&orderDir=DESC
-   **/
-  async findAll(orderBy: keyof Movie = "title", orderDir: "ASC" | "DESC" = "ASC") {
+   * @param orderBy - Field to order by (default: title)
+   * @param orderDir - Order direction (ASC or DESC, default: ASC)
+   * @returns List of movies or undefined if error occurs
+   * @throws BadRequestException if the request is invalid
+   */
+  async findAll(
+    orderBy: keyof Movie = "title",
+    orderDir: "ASC" | "DESC" = "ASC"
+  ): Promise<Movie[] | undefined> {
     try {
       return await this.movieRepository.find({
         order: { [orderBy]: orderDir },
       });
     } catch (error) {
       this.handleExceptions(error);
+      return undefined;
     }
   }
 
-  /*
+  /**
    * Find by ID (UUID) or Title (string)
    * Example: findOne('550e8400-e29b-41d4-a716-446655440000') or findOne('A New Hope')
-   **/
-  async findOne(term: string) {
+   * @param term - ID or Title of the movie
+   * @returns The found movie or undefined if not found
+   * @throws BadRequestException if the term is invalid
+   * @throws NotFoundException if the movie is not found
+   */
+  async findOne(term: string): Promise<Movie | undefined> {
     try {
       if (!term || typeof term !== "string") {
         throw new BadRequestException("Invalid ID/Title format or missing.");
@@ -89,7 +111,15 @@ export class MoviesService {
     }
   }
 
-  async update(id: string, updateMovieDto: UpdateMovieDto) {
+  /**
+   * Update a movie by ID
+   * @param id - Movie ID (UUID)
+   * @param updateMovieDto
+   * @returns The updated movie or undefined if error occurs
+   * @throws BadRequestException if the request is invalid
+   * @throws NotFoundException if the movie is not found
+   */
+  async update(id: string, updateMovieDto: UpdateMovieDto): Promise<Movie | undefined> {
     try {
       await this.findOne(id);
       await this.movieRepository.update(id, updateMovieDto);
@@ -100,7 +130,13 @@ export class MoviesService {
     }
   }
 
-  async remove(id: string) {
+  /**
+   * Remove a movie by ID
+   * @param id - Movie ID (UUID)
+   * @returns A message indicating the result of the removal or undefined if error occurs
+   * @throws NotFoundException if the movie is not found
+   */
+  async remove(id: string): Promise<{ message: string } | undefined> {
     try {
       const movie = await this.findOne(id);
       if (!movie) {
@@ -115,14 +151,25 @@ export class MoviesService {
     }
   }
 
-  async syncWithSwapi() {
+  /**
+   * Sync local database with SWAPI films
+   * This method fetches all films from SWAPI and adds them to the local database if they don't already exist
+   * It logs the process and handles errors gracefully
+   * @returns An object containing the count of synced movies and an array of results
+   * Each result contains the title, status (created/skipped), and reason if skipped
+   * @throws InternalServerErrorException if an unexpected error occurs during the sync process
+   */
+  async syncWithSwapi(): Promise<{
+    count: number;
+    results: { title: string; status: string; reason?: string }[];
+  }> {
     const response: { title: string; status: string; reason?: string }[] = [];
     this.logger.log("Sync local DB with SWAPI...");
     const movies = await this.fetchAllFilms();
 
     if (!movies || movies.length === 0) {
       this.logger.warn("No movies found from SWAPI to sync or there was an error fetching data.");
-      return { count: 0 };
+      return { count: 0, results: [] };
     }
 
     this.logger.log(`Fetched ${movies.length} movies from SWAPI. Starting sync...`);
@@ -148,22 +195,32 @@ export class MoviesService {
     return { count: response.length, results: response };
   }
 
-  /*
+  /**
    * You can replace the cron expression with @Cron(CronExpression.EVERY_MINUTE) for testing purposes
    * By default this will run the sync every day at 3 AM
-   **/
+   */
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async handleSwapiSyncCron() {
     this.logger.log("Running scheduled SWAPI sync...");
     await this.syncWithSwapi();
   }
 
+  /**
+   * Fetch all films from SWAPI
+   * @returns An array of film properties fetched from SWAPI
+   */
   private async fetchAllFilms(): Promise<SwapiFilmProperties[]> {
     const url = "https://www.swapi.tech/api/films";
     const response: AxiosResponse<{ result: SwapiFilmResult[] }> = await axios.get(url);
     return response.data.result.map(film => film.properties);
   }
 
+  /**
+   * This method handles exceptions and throws appropriate HTTP exceptions
+   * It logs the error and checks for specific error types to throw
+   * If the error is not recognized, it throws a generic InternalServerErrorException
+   * @param error - The error to handle
+   */
   private handleExceptions(error: unknown) {
     this.logger.error(error);
 

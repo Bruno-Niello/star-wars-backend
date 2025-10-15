@@ -21,6 +21,14 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
+  /**
+   * validateUser - Validates a user by email and password
+   * @param email - The email of the user
+   * @param password - The password of the user
+   * @returns null if user not found or password does not match
+   * @returns the user object without password if validation is successful
+   * @throws logs errors and returns null if an error occurs
+   */
   async validateUser(email: string, password: string) {
     try {
       this.logger.log(`validateUser - trying to find user by email: ${email}`);
@@ -47,7 +55,22 @@ export class AuthService {
     }
   }
 
-  async signUp(user: CreateUserDto) {
+  /**
+   * Sign up a new user
+   * This method first checks if a user with the given email already exists.
+   * If the user exists, it throws a ConflictException.
+   * If the user does not exist, it creates a new user using the UsersService.
+   * After creating the user, it generates an access token and a refresh token using JwtService.
+   * If any error occurs during this process, it logs the error and throws an UnauthorizedException.
+   * @param user - The user data for sign up
+   * @returns The created user object with access and refresh tokens
+   * @throws ConflictException if the user already exists
+   * @throws UnauthorizedException if sign up fails
+   */
+  async signUp(user: CreateUserDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     let userExists: User | null | undefined;
     try {
       userExists = await this.usersService.findOneWithPassword(user.email);
@@ -79,7 +102,20 @@ export class AuthService {
     }
   }
 
-  async signIn(email: string, pwd: string) {
+  /**
+   * Sign in a user
+   * @param email - The email of the user
+   * @param pwd - The password of the user
+   * @returns The user object with access and refresh tokens if sign in is successful
+   * @throws UnauthorizedException if sign in fails
+   */
+  async signIn(
+    email: string,
+    pwd: string
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     const validatedUser = await this.validateUser(email, pwd);
 
     if (!validatedUser || validatedUser instanceof NotFoundException) {
@@ -100,7 +136,16 @@ export class AuthService {
     }
   }
 
-  async refreshToken(refreshTokenDto: RefreshTokenDto) {
+  /**
+   * Refresh the access token using the refresh token
+   * @param refreshTokenDto - The refresh token data transfer object
+   * @returns The new access token and refresh token
+   * @throws UnauthorizedException if the refresh token is invalid or expired
+   */
+  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
     try {
       const { refreshToken } = refreshTokenDto;
 

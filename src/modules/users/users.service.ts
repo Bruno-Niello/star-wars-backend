@@ -21,7 +21,13 @@ export class UsersService {
     private readonly userRepository: Repository<User>
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
+  /**
+   * Create a user manually, its an admin function
+   * @param createUserDto - Data transfer object for creating a user
+   * @returns The created user or undefined if an error occurs
+   * @throws BadRequestException if the user already exists
+   */
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, "password"> | undefined> {
     try {
       const { email, password, ...data } = createUserDto;
 
@@ -47,7 +53,12 @@ export class UsersService {
     }
   }
 
-  async findAll() {
+  /**
+   * Find all users
+   * @returns All users without passwords or undefined if an error occurs
+   * @throws BadRequestException if the request is invalid
+   */
+  async findAll(): Promise<Omit<User, "password">[] | undefined> {
     try {
       const users = await this.userRepository.find();
       this.logger.log(`Fetched ${users.length} users`);
@@ -60,7 +71,14 @@ export class UsersService {
     }
   }
 
-  async findOne(term: string) {
+  /**
+   * Find a user by ID or Email
+   * @param term - User ID or Email
+   * @returns The found user without password or undefined if not found
+   * @throws BadRequestException if the term is invalid
+   * @throws NotFoundException if the user is not found
+   */
+  async findOne(term: string): Promise<Omit<User, "password"> | undefined> {
     try {
       if (!term || typeof term !== "string") {
         throw new BadRequestException("Invalid ID or Email format.");
@@ -91,10 +109,14 @@ export class UsersService {
     }
   }
 
-  /* 
-    This method is similar to findOne but returns the user including the password for Auth purposes.
-  **/
-  async findOneWithPassword(term: string) {
+  /**
+   * This method is similar to findOne but returns the user including the password for Auth purposes.
+   * @param term - User ID or Email
+   * @returns The found user including password or undefined if not found
+   * @throws BadRequestException if the term is invalid
+   * @throws NotFoundException if the user is not found
+   */
+  async findOneWithPassword(term: string): Promise<User | undefined> {
     try {
       if (!term || typeof term !== "string") {
         throw new BadRequestException("Invalid ID or Email format.");
@@ -121,7 +143,18 @@ export class UsersService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  /**
+   * Update a user by ID
+   * @param id - User ID (UUID)
+   * @param updateUserDto - Data transfer object for updating a user
+   * @returns updated user without password or undefined if error occurs
+   * @throws BadRequestException if the request is invalid
+   * @throws NotFoundException if the user is not found
+   */
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto
+  ): Promise<Omit<User, "password"> | undefined> {
     try {
       await this.findOne(id);
 
@@ -139,7 +172,13 @@ export class UsersService {
     }
   }
 
-  async createAdmin(email: string) {
+  /**
+   * Promote a user to admin, this is for testing purposes. Should be removed in production.
+   * @param email - User email to promote to admin
+   * @returns a message indicating the result of the promotion or undefined if error occurs
+   * @throws NotFoundException if the user is not found
+   */
+  async createAdmin(email: string): Promise<{ message: string } | undefined> {
     this.logger.log(`Promoting user to admin: ${email}`);
     try {
       const user = await this.userRepository.findOneBy({ email });
@@ -156,7 +195,13 @@ export class UsersService {
     }
   }
 
-  async remove(id: string) {
+  /**
+   * Delete a user by ID
+   * @param id - User ID (UUID)
+   * @returns a message indicating the result of the deletion or undefined if error occurs
+   * @throws NotFoundException if the user is not found
+   */
+  async remove(id: string): Promise<{ message: string } | undefined> {
     try {
       const user = await this.userRepository.findOneBy({ id });
       if (!user) {
@@ -172,6 +217,12 @@ export class UsersService {
     }
   }
 
+  /**
+   * This method handles exceptions and throws appropriate HTTP exceptions
+   * It logs the error and checks for specific error types to throw
+   * If the error is not recognized, it throws a generic InternalServerErrorException
+   * @param error - The error to handle
+   */
   private handleExceptions(error: unknown) {
     this.logger.error(error);
 
