@@ -15,11 +15,11 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 - [Características](#características)
 - [Requisitos](#requisitos)
 - [Instalación](#instalación)
+- [Documentación](#documentación)
 - [Testing](#testing)
 - [Comandos útiles](#comandos-útiles)
 - [Estructura del proyecto](#estructura-del-proyecto)
 - [Notas](#notas)
-- [Documentación](#documentación)
 
 ---
 
@@ -94,11 +94,11 @@ Esta API expone documentación interactiva generada automáticamente con [Swagge
   - Consultar los parámetros, tipos y descripciones de cada ruta.
 
 La configuración de Swagger se encuentra en el archivo principal (`main.ts`).  
-Puedes personalizar la documentación modificando los decoradores `@Api*` en controladores, DTOs y entidades.
+Puedes ver la implementacion de la documentación en los decoradores `@Api*` en controladores, DTOs y entidades.
 
 ### JSDoc
 
-El código fuente utiliza comentarios **JSDoc** para describir funciones, clases y métodos importantes, facilitando la comprensión y el mantenimiento del proyecto.
+El código fuente utiliza comentarios **JSDoc** para describir los servicios, facilitando la comprensión y el mantenimiento del proyecto.
 
 - Puedes ver las descripciones y anotaciones directamente en el código.
 - Los IDEs como VS Code muestran estos comentarios al pasar el cursor sobre funciones y clases.
