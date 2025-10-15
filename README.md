@@ -44,31 +44,28 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 ## Instalación
 
 1. **Clonar el repositorio**
-   ```bash
+```bash
    git clone https://github.com/tu-usuario/nest-conexa.git
    cd nest-conexa
 ```
 
 2. **Instalar dependencias**
-   ```bash
-   npm install
+```bash
+  npm install
 ```
 
 3. **Renombrar el archivo ```.env.example``` a ```.env```**
-   ```bash
+```bash
    mv .env.example .env
 ```
 
 4. **Levantar la base de datos**
-   ```bash
-   docker-compose up -d 
-   ```
-  Nota: Si usas DBeaver y ves el error
-  Invalid value for parameter "TimeZone": "America/Buenos_Aires"
-  cambia el valor de la zona horaria o usa otra herramienta.
+```bash
+  docker-compose up -d 
+```
 
 5. **Iniciar el modo desarrollo**
-   ```bash
+```bash
    npm run start:dev
 ```
 ---
