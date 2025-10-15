@@ -1,6 +1,13 @@
+//-------------------------------------------------------------------------//
+//-------------------------------IMPORTANTE--------------------------------//
+//-------------------------------------------------------------------------//
+//    Por falta de tiempo tuve que utilizar IA                             //
+//     para generar y arreglar estos tests.                                //
+//    He intentado mantener la lógica original en la medida de lo posible. //
+//    Hay muchos errores de TS y linter que no he podido corregir.         //
+//    Lamento el resultado. - Bruno                                        //
+//-------------------------------------------------------------------------//
 import { Test, TestingModule } from "@nestjs/testing";
-// Asumiendo que MoviesController está en un archivo "movies.controller" en el mismo nivel que el directorio de pruebas
-// Nota: La ruta real puede variar (ej. ".. /src/movies/movies.controller")
 import { MoviesController } from "../movies.controller";
 import { MoviesService } from "../movies.service";
 import { CreateMovieDto } from "../dto/create-movie.dto";

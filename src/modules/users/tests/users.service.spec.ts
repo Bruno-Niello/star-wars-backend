@@ -1,14 +1,21 @@
+//-------------------------------------------------------------------------//
+//-------------------------------IMPORTANTE--------------------------------//
+//-------------------------------------------------------------------------//
+//    Por falta de tiempo tuve que utilizar IA                             //
+//     para generar y arreglar estos tests.                                //
+//    He intentado mantener la lógica original en la medida de lo posible. //
+//    Hay muchos errores de TS y linter que no he podido corregir.         //
+//    Lamento el resultado. - Bruno                                        //
+//-------------------------------------------------------------------------//
 import { Test, TestingModule } from "@nestjs/testing";
 import { UsersService } from "../users.service";
 import { getRepositoryToken } from "@nestjs/typeorm";
 import { User } from "../entities/user.entity";
 import { Repository } from "typeorm";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-
-// Importamos el bcrypt real para poder mockear su función hash
 import * as bcrypt from "bcrypt";
 
-// Definición de tipos y datos de prueba
+// Mock del repositorio
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 const createUserDto = {
   email: "test@example.com",
@@ -19,7 +26,7 @@ const createUserDto = {
 const userEntity = {
   id: "uuid-test-1",
   email: createUserDto.email,
-  password: "hashedPassword123", // Contraseña ya hasheada
+  password: "hashedPassword123",
   role: "USER",
   fullName: "Test User",
 };

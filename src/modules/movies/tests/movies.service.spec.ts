@@ -1,3 +1,12 @@
+//-------------------------------------------------------------------------//
+//-------------------------------IMPORTANTE--------------------------------//
+//-------------------------------------------------------------------------//
+//    Por falta de tiempo tuve que utilizar IA                             //
+//     para generar y arreglar estos tests.                                //
+//    He intentado mantener la lógica original en la medida de lo posible. //
+//    Hay muchos errores de TS y linter que no he podido corregir.         //
+//    Lamento el resultado. - Bruno                                        //
+//-------------------------------------------------------------------------//
 import { Test, TestingModule } from "@nestjs/testing";
 import { MoviesService } from "../movies.service";
 import { getRepositoryToken } from "@nestjs/typeorm";
@@ -10,8 +19,7 @@ import {
 import axios from "axios";
 import { isUUID } from "class-validator";
 
-// Mock del Repositorio de TypeORM
-// Solo mockeamos los métodos que usamos en el servicio
+// Mock del repositorio de Movie
 const mockMovieRepository = {
   create: jest.fn(),
   save: jest.fn(),

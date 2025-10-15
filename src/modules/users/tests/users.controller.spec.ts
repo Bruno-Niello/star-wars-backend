@@ -1,3 +1,12 @@
+//-------------------------------------------------------------------------//
+//-------------------------------IMPORTANTE--------------------------------//
+//-------------------------------------------------------------------------//
+//    Por falta de tiempo tuve que utilizar IA                             //
+//     para generar y arreglar estos tests.                                //
+//    He intentado mantener la lógica original en la medida de lo posible. //
+//    Hay muchos errores de TS y linter que no he podido corregir.         //
+//    Lamento el resultado. - Bruno                                        //
+//-------------------------------------------------------------------------//
 import { Test, TestingModule } from "@nestjs/testing";
 import { UsersController } from "../users.controller";
 import { UsersService } from "../users.service";
@@ -5,8 +14,7 @@ import { CreateUserDto } from "../dto/create-user.dto";
 import { UpdateUserDto } from "../dto/update-user.dto";
 import { CreateAdminDto } from "../dto/create-admin.dto";
 
-// 1. Mock de los Guards para que SIEMPRE permitan la activación
-// Esto aísla el test de la lógica de autenticación/autorización real.
+// 1. Mock de los Guards
 jest.mock("../../auth/guards/auth.guard", () => ({
   AuthGuard: jest.fn().mockImplementation(() => ({
     canActivate: jest.fn().mockReturnValue(true),
@@ -21,7 +29,7 @@ jest.mock("../../auth/guards/roles.guard", () => ({
 describe("UsersController", () => {
   let controller: UsersController;
 
-  // 2. Mock del servicio, definiendo solo los métodos que usa el controlador.
+  // 2. Mock del servicio
   const mockUsersService = {
     create: jest.fn(),
     findAll: jest.fn(),
@@ -41,7 +49,6 @@ describe("UsersController", () => {
   });
 
   afterEach(() => {
-    // Limpiamos los mocks después de cada prueba
     jest.clearAllMocks();
   });
 
