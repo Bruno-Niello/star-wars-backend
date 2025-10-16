@@ -32,7 +32,7 @@ export class AuthGuard implements CanActivate {
       if (!token) {
         throw new UnauthorizedException("No token provided");
       }
-      const jwtSecret = process.env.JWT_SECRET || "defaultSecret";
+      const jwtSecret = process.env.JWT_SECRET;
       request["user"] = await this.jwtService.verifyAsync<JwtPayload>(token, {
         secret: jwtSecret,
       });

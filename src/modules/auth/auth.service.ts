@@ -88,12 +88,18 @@ export class AuthService {
     try {
       const createdUser = await this.usersService.create(user);
       if (!createdUser) throw new UnauthorizedException();
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) throw new UnauthorizedException("JWT secret not set");
 
       return {
         ...createdUser,
-        accessToken: await this.jwtService.signAsync(createdUser),
+        accessToken: await this.jwtService.signAsync(createdUser, {
+          expiresIn: "1d",
+          secret: jwtSecret,
+        }),
         refreshToken: await this.jwtService.signAsync(createdUser, {
           expiresIn: "1d",
+          secret: jwtSecret,
         }),
       };
     } catch (error) {
@@ -123,11 +129,18 @@ export class AuthService {
     }
 
     try {
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) throw new UnauthorizedException("JWT secret not set");
+
       return {
         ...validatedUser,
-        accessToken: await this.jwtService.signAsync(validatedUser),
+        accessToken: await this.jwtService.signAsync(validatedUser, {
+          expiresIn: "1d",
+          secret: jwtSecret,
+        }),
         refreshToken: await this.jwtService.signAsync(validatedUser, {
           expiresIn: "1d",
+          secret: jwtSecret,
         }),
       };
     } catch (error) {
@@ -158,11 +171,17 @@ export class AuthService {
       // Exclude password from the returned user object
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _password, ...safeUser } = user;
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) throw new UnauthorizedException("JWT secret not set");
 
       return {
-        accessToken: await this.jwtService.signAsync(safeUser),
+        accessToken: await this.jwtService.signAsync(safeUser, {
+          expiresIn: "1d",
+          secret: jwtSecret,
+        }),
         refreshToken: await this.jwtService.signAsync(safeUser, {
           expiresIn: "1d",
+          secret: jwtSecret,
         }),
       };
     } catch (error) {

@@ -13,7 +13,7 @@ import {
 import { MoviesService } from "./movies.service";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from "@nestjs/swagger";
+import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { Movie } from "./entities/movie.entity";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { AuthGuard } from "../auth/guards/auth.guard";
@@ -39,6 +39,22 @@ export class MoviesController {
   @Get()
   @ApiResponse({ status: 200, description: "List of movies retrieved successfully." })
   @ApiOperation({ summary: "Retrieve a list of all movies" })
+  @ApiQuery({
+    name: "orderBy",
+    required: false,
+    type: String,
+    description: "Field to order by",
+    example: "title",
+    default: "title",
+  })
+  @ApiQuery({
+    name: "orderDir",
+    required: false,
+    enum: ["ASC", "DESC"],
+    description: "Order direction",
+    example: "ASC",
+    default: "ASC",
+  })
   findAll(
     @Query("orderBy") orderBy: keyof Movie = "title",
     @Query("orderDir") orderDir: "ASC" | "DESC" = "ASC"
