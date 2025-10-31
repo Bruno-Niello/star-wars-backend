@@ -18,6 +18,7 @@ import {
   SwapiSyncResponseDto,
   DeleteMovieResponseDto,
 } from "./dto/movie-response.dto";
+import { PaginatedMoviesResponseDto, PaginationMetaDto } from "./dto/paginated-response.dto";
 import { Movie } from "./entities/movie.entity";
 import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiQuery } from "@nestjs/swagger";
 import { Roles } from "../auth/decorators/roles.decorator";
@@ -48,10 +49,26 @@ export class MoviesController {
   @Get()
   @ApiResponse({
     status: 200,
-    description: "List of movies retrieved successfully.",
-    type: [MovieResponseDto],
+    description: "Paginated list of movies retrieved successfully.",
+    type: PaginatedMoviesResponseDto,
   })
-  @ApiOperation({ summary: "Retrieve a list of all movies" })
+  @ApiOperation({ summary: "Retrieve a paginated list of all movies" })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Page number (1-based)",
+    example: 1,
+    default: 1,
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Number of items per page",
+    example: 10,
+    default: 10,
+  })
   @ApiQuery({
     name: "orderBy",
     required: false,
@@ -68,11 +85,23 @@ export class MoviesController {
     example: "ASC",
     default: "ASC",
   })
-  findAll(
+  async findAll(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10,
     @Query("orderBy") orderBy: keyof Movie = "title",
     @Query("orderDir") orderDir: "ASC" | "DESC" = "ASC"
   ) {
-    return this.moviesService.findAll(orderBy, orderDir);
+    const result = await this.moviesService.findAll(page, limit, orderBy, orderDir);
+
+    if (!result) {
+      throw new Error("Failed to retrieve movies");
+    }
+
+    const { movies, totalItems } = result;
+    const movieDtos = movies.map(movie => new MovieResponseDto(movie));
+    const meta = new PaginationMetaDto(page, limit, totalItems);
+
+    return new PaginatedMoviesResponseDto(movieDtos, meta);
   }
 
   @Get(":id")

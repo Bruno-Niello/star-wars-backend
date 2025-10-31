@@ -57,22 +57,30 @@ export class MoviesService {
   }
 
   /**
-   * Default sorting by title in ascending order
-   * You can pass orderBy and orderDir on query params to customize sorting
-   * For example: /movies?orderBy=release_date&orderDir=DESC
+   * Get paginated list of movies with sorting
+   * @param page - Page number (1-based)
+   * @param limit - Number of items per page
    * @param orderBy - Field to order by (default: title)
    * @param orderDir - Order direction (ASC or DESC, default: ASC)
-   * @returns List of movies or undefined if error occurs
+   * @returns Paginated list of movies with metadata
    * @throws BadRequestException if the request is invalid
    */
   async findAll(
+    page: number = 1,
+    limit: number = 10,
     orderBy: keyof Movie = "title",
     orderDir: "ASC" | "DESC" = "ASC"
-  ): Promise<Movie[] | undefined> {
+  ): Promise<{ movies: Movie[]; totalItems: number } | undefined> {
     try {
-      return await this.movieRepository.find({
+      const skip = (page - 1) * limit;
+
+      const [movies, totalItems] = await this.movieRepository.findAndCount({
         order: { [orderBy]: orderDir },
+        skip,
+        take: limit,
       });
+
+      return { movies, totalItems };
     } catch (error) {
       this.handleExceptions(error);
       return undefined;
