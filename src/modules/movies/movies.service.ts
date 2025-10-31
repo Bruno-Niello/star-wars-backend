@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { CreateMovieDto } from "./dto/create-movie.dto";
 import { UpdateMovieDto } from "./dto/update-movie.dto";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -20,7 +21,8 @@ export class MoviesService {
 
   constructor(
     @InjectRepository(Movie)
-    private readonly movieRepository: Repository<Movie>
+    private readonly movieRepository: Repository<Movie>,
+    private readonly configService: ConfigService
   ) {}
 
   /**
@@ -210,7 +212,11 @@ export class MoviesService {
    * @returns An array of film properties fetched from SWAPI
    */
   private async fetchAllFilms(): Promise<SwapiFilmProperties[]> {
-    const url = "https://www.swapi.tech/api/films";
+    const baseUrl = this.configService.get<string>("swapi.baseUrl");
+    const filmsEndpoint = this.configService.get<string>("swapi.filmsEndpoint");
+    const url = `${baseUrl}${filmsEndpoint}`;
+
+    this.logger.log(`Fetching films from SWAPI: ${url}`);
     const response: AxiosResponse<{ result: SwapiFilmResult[] }> = await axios.get(url);
     return response.data.result.map(film => film.properties);
   }
