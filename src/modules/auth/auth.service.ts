@@ -28,10 +28,12 @@ export class AuthService {
    * @returns JWT configuration object
    */
   private getJwtConfig() {
-    return {
-      secret: this.configService.get<string>("jwt.secret"),
-      expiresIn: this.configService.get<string>("jwt.expiresIn"),
-    };
+    const secret = this.configService.get<string>("jwt.secret") || process.env.JWT_SECRET || "fallbackSecret123";
+    const expiresIn = this.configService.get<string>("jwt.expiresIn") || "1d";
+
+    this.logger.debug(`🔑 JWT Config: secret exists: ${!!secret}, expiresIn: ${expiresIn}`);
+
+    return { secret, expiresIn };
   }
 
   /**
@@ -102,19 +104,13 @@ export class AuthService {
       const createdUser = await this.usersService.create(user);
       if (!createdUser) throw new UnauthorizedException();
 
-      // Validate JWT configuration
-      const jwtConfig = this.getJwtConfig();
-      if (!jwtConfig.secret) {
-        this.logger.error("JWT secret is not configured");
-        throw new UnauthorizedException("JWT configuration error");
-      }
-
       const payload = { sub: createdUser.id, email: createdUser.email };
+      const jwtConfig = this.getJwtConfig();
 
       return {
         ...createdUser,
-        accessToken: await this.jwtService.signAsync(payload),
-        refreshToken: await this.jwtService.signAsync(payload),
+        accessToken: await this.jwtService.signAsync(payload, { secret: jwtConfig.secret }),
+        refreshToken: await this.jwtService.signAsync(payload, { secret: jwtConfig.secret }),
       };
     } catch (error) {
       this.logger.error(error);
@@ -143,19 +139,13 @@ export class AuthService {
     }
 
     try {
-      // Validate JWT configuration
-      const jwtConfig = this.getJwtConfig();
-      if (!jwtConfig.secret) {
-        this.logger.error("JWT secret is not configured");
-        throw new UnauthorizedException("JWT configuration error");
-      }
-
       const payload = { sub: validatedUser.id, email: validatedUser.email };
+      const jwtConfig = this.getJwtConfig();
 
       return {
         ...validatedUser,
-        accessToken: await this.jwtService.signAsync(payload),
-        refreshToken: await this.jwtService.signAsync(payload),
+        accessToken: await this.jwtService.signAsync(payload, { secret: jwtConfig.secret }),
+        refreshToken: await this.jwtService.signAsync(payload, { secret: jwtConfig.secret }),
       };
     } catch (error) {
       this.logger.error(error);
@@ -186,10 +176,11 @@ export class AuthService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _password, ...safeUser } = user;
       const payload = { sub: user.id, email: user.email };
-
+      const jwtConfig = this.getJwtConfig();
+      
       return {
-        accessToken: await this.jwtService.signAsync(payload),
-        refreshToken: await this.jwtService.signAsync(payload),
+        accessToken: await this.jwtService.signAsync(payload, { secret: jwtConfig.secret }),
+        refreshToken: await this.jwtService.signAsync(payload, { secret: jwtConfig.secret }),
       };
     } catch (error) {
       this.logger.error(error);

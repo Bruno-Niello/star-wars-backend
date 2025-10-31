@@ -17,24 +17,26 @@ export interface AppConfig {
   };
 }
 
-export default (): AppConfig => ({
-  port: parseInt(process.env.PORT || "3000", 10),
-  database: {
-    host: process.env.DB_HOST || "localhost",
-    port: parseInt(process.env.DB_PORT || "5432", 10),
-    name: process.env.DB_NAME || "conexa_db",
-    username: process.env.DB_USERNAME || "postgres",
-    password: process.env.DB_PASSWORD || "password",
-  },
-  jwt: {
-    secret: process.env.JWT_SECRET || "defaultSecret",
-    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
-  },
-  swapi: {
-    baseUrl: process.env.SWAPI_BASE_URL || "https://www.swapi.tech/api",
-    filmsEndpoint: process.env.SWAPI_FILMS_ENDPOINT || "/films",
-  },
-});
+export default (): AppConfig => {
+  return {
+    port: parseInt(process.env.PORT || "3000", 10),
+    database: {
+      host: process.env.DB_HOST || "localhost",
+      port: parseInt(process.env.DB_PORT || "5432", 10),
+      name: process.env.DB_NAME || "conexa_db",
+      username: process.env.DB_USERNAME || "postgres",
+      password: process.env.DB_PASSWORD || "password",
+    },
+    jwt: {
+      secret: process.env.JWT_SECRET || "defaultSecret",
+      expiresIn: process.env.JWT_EXPIRATION_TIME || process.env.JWT_EXPIRES_IN || "1d",
+    },
+    swapi: {
+      baseUrl: process.env.SWAPI_BASE_URL || "https://www.swapi.tech/api",
+      filmsEndpoint: process.env.SWAPI_FILMS_ENDPOINT || "/films",
+    },
+  };
+};
 
 export const CONFIG_KEYS = {
   PORT: "port",

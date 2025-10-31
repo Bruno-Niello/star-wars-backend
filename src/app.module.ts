@@ -28,10 +28,14 @@ import configuration from "./config/configuration";
       inject: [ConfigService],
     }),
     JwtModule.registerAsync({
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>("jwt.secret") || "defaultSecret",
-        global: true,
-      }),
+      global: true,
+      useFactory: (configService: ConfigService) => {
+        const secret: string = configService.get<string>("jwt.secret") || "fallbackSecret123";
+        return {
+          secret,
+          signOptions: { expiresIn: "1d" },
+        };
+      },
       inject: [ConfigService],
     }),
     UsersModule,
