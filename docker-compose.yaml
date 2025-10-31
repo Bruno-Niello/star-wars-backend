@@ -1,12 +1,33 @@
-services: 
+services:
+  # Database
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: conexadb
     ports:
       - "5432:5432"
-    container_name: nest_conexa_db
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+  # NestJS App
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=conexadb
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=test
+      - JWT_SECRET=my_personal_secret_key_123
+      - JWT_EXPIRATION_TIME=1d
+      - SWAPI_BASE_URL=https://www.swapi.tech/api
+      - SWAPI_FILMS_ENDPOINT=/films
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
