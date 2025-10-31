@@ -1,29 +1,38 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MoviesModule } from "./modules/movies/movies.module";
 import { UsersModule } from "./modules/users/users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ScheduleModule } from "@nestjs/schedule";
 import { AuthModule } from "./modules/auth/auth.module";
 import { JwtModule } from "@nestjs/jwt";
+import configuration from "./config/configuration";
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: "postgres",
-      host: process.env.DB_HOST,
-      port: +(process.env.DB_PORT ?? 5432),
-      database: process.env.DB_NAME,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      autoLoadEntities: true,
-      synchronize: true,
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
     }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || "defaultSecret",
-      signOptions: { expiresIn: "1d" },
-      global: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        type: "postgres",
+        host: configService.get<string>("database.host"),
+        port: configService.get<number>("database.port"),
+        database: configService.get<string>("database.name"),
+        username: configService.get<string>("database.username"),
+        password: configService.get<string>("database.password"),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+      inject: [ConfigService],
+    }),
+    JwtModule.registerAsync({
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>("jwt.secret") || "defaultSecret",
+        global: true,
+      }),
+      inject: [ConfigService],
     }),
     UsersModule,
     MoviesModule,

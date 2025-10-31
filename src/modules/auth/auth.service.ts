@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
 import { UsersService } from "../users/users.service";
 import * as bcrypt from "bcrypt";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
@@ -18,8 +19,20 @@ export class AuthService {
 
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private configService: ConfigService
   ) {}
+
+  /**
+   * Get JWT configuration from ConfigService
+   * @returns JWT configuration object
+   */
+  private getJwtConfig() {
+    return {
+      secret: this.configService.get<string>("jwt.secret"),
+      expiresIn: this.configService.get<string>("jwt.expiresIn"),
+    };
+  }
 
   /**
    * validateUser - Validates a user by email and password
@@ -88,19 +101,20 @@ export class AuthService {
     try {
       const createdUser = await this.usersService.create(user);
       if (!createdUser) throw new UnauthorizedException();
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) throw new UnauthorizedException("JWT secret not set");
+
+      // Validate JWT configuration
+      const jwtConfig = this.getJwtConfig();
+      if (!jwtConfig.secret) {
+        this.logger.error("JWT secret is not configured");
+        throw new UnauthorizedException("JWT configuration error");
+      }
+
+      const payload = { sub: createdUser.id, email: createdUser.email };
 
       return {
         ...createdUser,
-        accessToken: await this.jwtService.signAsync(createdUser, {
-          expiresIn: "1d",
-          secret: jwtSecret,
-        }),
-        refreshToken: await this.jwtService.signAsync(createdUser, {
-          expiresIn: "1d",
-          secret: jwtSecret,
-        }),
+        accessToken: await this.jwtService.signAsync(payload),
+        refreshToken: await this.jwtService.signAsync(payload),
       };
     } catch (error) {
       this.logger.error(error);
@@ -129,19 +143,19 @@ export class AuthService {
     }
 
     try {
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) throw new UnauthorizedException("JWT secret not set");
+      // Validate JWT configuration
+      const jwtConfig = this.getJwtConfig();
+      if (!jwtConfig.secret) {
+        this.logger.error("JWT secret is not configured");
+        throw new UnauthorizedException("JWT configuration error");
+      }
+
+      const payload = { sub: validatedUser.id, email: validatedUser.email };
 
       return {
         ...validatedUser,
-        accessToken: await this.jwtService.signAsync(validatedUser, {
-          expiresIn: "1d",
-          secret: jwtSecret,
-        }),
-        refreshToken: await this.jwtService.signAsync(validatedUser, {
-          expiresIn: "1d",
-          secret: jwtSecret,
-        }),
+        accessToken: await this.jwtService.signAsync(payload),
+        refreshToken: await this.jwtService.signAsync(payload),
       };
     } catch (error) {
       this.logger.error(error);
@@ -171,18 +185,11 @@ export class AuthService {
       // Exclude password from the returned user object
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _password, ...safeUser } = user;
-      const jwtSecret = process.env.JWT_SECRET;
-      if (!jwtSecret) throw new UnauthorizedException("JWT secret not set");
+      const payload = { sub: user.id, email: user.email };
 
       return {
-        accessToken: await this.jwtService.signAsync(safeUser, {
-          expiresIn: "1d",
-          secret: jwtSecret,
-        }),
-        refreshToken: await this.jwtService.signAsync(safeUser, {
-          expiresIn: "1d",
-          secret: jwtSecret,
-        }),
+        accessToken: await this.jwtService.signAsync(payload),
+        refreshToken: await this.jwtService.signAsync(payload),
       };
     } catch (error) {
       this.logger.error(error);
