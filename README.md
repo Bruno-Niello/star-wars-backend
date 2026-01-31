@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# CONEXA API
+# STAR WARS API
 
 API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de usuarios y películas, incluyendo autenticación JWT, roles y sincronización con SWAPI.
 
@@ -47,8 +47,8 @@ API RESTful desarrollada con [NestJS](https://nestjs.com/) para la gestión de u
 
 1. **Clonar el repositorio**
 ```bash
-   git clone https://github.com/tu-usuario/nest-conexa.git
-   cd nest-conexa
+   git clone https://github.com/tu-usuario/nest-starwars.git
+   cd nest-starwars
 ```
 
 2. **Instalar dependencias**

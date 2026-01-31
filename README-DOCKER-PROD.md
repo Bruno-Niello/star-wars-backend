@@ -7,7 +7,7 @@ Simple Docker setup for personal development.
 1. **Clone and run:**
    ```bash
    git clone <your-repo>
-   cd nest-conexa
+   cd nest-starwars
    npm run docker:up
    ```
 

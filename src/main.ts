@@ -18,10 +18,10 @@ async function main() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle("Conexa API")
-    .setDescription("The Conexa Star Wars API description")
+    .setTitle("StarWars API")
+    .setDescription("The StarWars Star Wars API description")
     .setVersion("1.0")
-    .addTag("conexa")
+    .addTag("starwars")
     .addBearerAuth()
     .build();
 

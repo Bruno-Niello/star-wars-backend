@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test
-      POSTGRES_DB: conexadb
+      POSTGRES_DB: starwarsdb
     ports:
       - "5432:5432"
     volumes:
@@ -19,7 +19,7 @@ services:
     environment:
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_NAME=conexadb
+      - DB_NAME=starwarsdb
       - DB_USERNAME=postgres
       - DB_PASSWORD=test
       - JWT_SECRET=my_personal_secret_key_123
